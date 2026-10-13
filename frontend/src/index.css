@@ -1,0 +1,103 @@
+/* =========================================================
+   MICROARTS - GLOBAL STYLES
+   index.css
+
+   Keep only global/base styles in this file.
+   Page and component styles belong in App.css.
+   ========================================================= */
+
+
+/* ================= RESET ================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ================= ROOT ================= */
+
+:root {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  color: #222222;
+  background: #ffffff;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* ================= HTML ================= */
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+/* ================= BODY ================= */
+
+body {
+  margin: 0;
+
+  min-width: 320px;
+  min-height: 100vh;
+
+  background: #ffffff;
+  color: #222222;
+}
+
+
+/* ================= REACT ROOT ================= */
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+
+/* ================= BASIC ELEMENTS ================= */
+
+img {
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+}
+
+
+/* ================= ACCESSIBILITY ================= */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #8b5e3c;
+  outline-offset: 2px;
+}
