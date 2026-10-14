@@ -100,7 +100,11 @@ function App() {
   const [selectedArtwork, setSelectedArtwork] =
     useState(null)
 
-  const [customRequestArtwork, setCustomRequestArtwork] = useState(null)
+  const [customRequestArtwork, setCustomRequestArtwork] =
+    useState(null)
+
+  const [requestFormType, setRequestFormType] =
+    useState("custom-art")
 
   const [showRequestForm, setShowRequestForm] =
     useState(false)
@@ -3061,14 +3065,30 @@ function App() {
 
 
                       <p>
-                        <strong>Request:</strong>{" "}
-                        {request.requestDetails}
+                        <strong>Type:</strong>{" "}
+                        {request.requestType === "contact"
+                          ? "General Contact"
+                          : "Customized Art Request"}
+                      </p>
+
+
+                      <p>
+                        <strong>
+                          {request.requestType === "contact"
+                            ? "Reason:"
+                            : "Request:"}
+                        </strong>{" "}
+                        {request.requestDetails ||
+                          "No reason provided"}
                       </p>
 
 
                       <p>
                         <strong>Artwork:</strong>{" "}
-                        {request.artworkId?.title || "Artwork"}
+                        {request.artworkId?.title ||
+                          (request.requestType === "contact"
+                            ? "Not applicable"
+                            : "New custom idea")}
                       </p>
 
 
@@ -4331,11 +4351,11 @@ function App() {
 
               <button
                 onClick={() => {
+                  setRequestFormType("custom-art")
                   setCustomRequestArtwork(selectedArtwork)
                   setSelectedArtwork(null)
 
                   setRequestSubmitted(false)
-
                   setShowRequestForm(true)
                 }}
               >
@@ -4714,13 +4734,10 @@ function App() {
 
               <button
                 onClick={() => {
-                  setRequestSubmitted(
-                    false
-                  )
-
-                  setShowRequestForm(
-                    true
-                  )
+                  setRequestFormType("custom-art")
+                  setCustomRequestArtwork(null)
+                  setRequestSubmitted(false)
+                  setShowRequestForm(true)
                 }}
               >
                 Request Customized Art
@@ -4782,13 +4799,10 @@ function App() {
 
             <button
               onClick={() => {
-                setRequestSubmitted(
-                  false
-                )
-
-                setShowRequestForm(
-                  true
-                )
+                setRequestFormType("contact")
+                setCustomRequestArtwork(null)
+                setRequestSubmitted(false)
+                setShowRequestForm(true)
               }}
             >
               Contact the Artist
@@ -4842,20 +4856,24 @@ function App() {
 
           <div className="request-modal-content">
 
-            {customRequestArtwork && (
-              <p>
-                Requesting customization for:{" "}
-                <strong>{customRequestArtwork.title}</strong>
-              </p>
-            )}
+            {requestFormType === "custom-art" &&
+              customRequestArtwork && (
+                <p>
+                  Requesting customization for:{" "}
+                  <strong>
+                    {customRequestArtwork.title}
+                  </strong>
+                </p>
+              )}
 
             <button
               className="close-modal"
-              onClick={() =>
-                setShowRequestForm(
-                  false
-                )
-              }
+              onClick={() => {
+                setShowRequestForm(false)
+                setRequestSubmitted(false)
+                setCustomRequestArtwork(null)
+                setRequestFormType("custom-art")
+              }}
             >
               ×
             </button>
@@ -4865,13 +4883,15 @@ function App() {
               <>
 
                 <h2>
-                  Request Customized Art
+                  {requestFormType === "contact"
+                    ? "Contact the Artist"
+                    : "Request Customized Art"}
                 </h2>
 
                 <p>
-                  Tell us how we can contact
-                  you about your customized
-                  MicroArt.
+                  {requestFormType === "contact"
+                    ? "Enter your contact details below. You can also describe your reason for contacting the artist."
+                    : "Enter your details and describe the customized MicroArt you would like."}
                 </p>
 
                 <form
@@ -4884,12 +4904,25 @@ function App() {
                     const formData = new FormData(form)
 
                     const requestData = {
-                      fullName: formData.get("fullName"),
+                      fullName:
+                        formData.get("fullName"),
+
                       phone:
                         `${formData.get("countryCode")}${formData.get("phone")}`,
-                      email: formData.get("email"),
-                      requestDetails: formData.get("requestDetails"),
-                      artworkId: customRequestArtwork?._id,
+
+                      email:
+                        formData.get("email"),
+
+                      requestDetails:
+                        formData.get("requestDetails") || "",
+
+                      requestType:
+                        requestFormType,
+
+                      artworkId:
+                        requestFormType === "custom-art"
+                          ? customRequestArtwork?._id
+                          : null,
                     }
 
                     try {
@@ -5050,20 +5083,31 @@ function App() {
                   <div className="form-group">
 
                     <label>
-                      Request Details
+                      {requestFormType === "contact"
+                        ? "Reason for Contacting the Artist (Optional)"
+                        : "Request Details"}
                     </label>
 
                     <textarea
                       name="requestDetails"
-                      required
-                      placeholder="Describe the customized MicroArt you would like"
+                      required={
+                        requestFormType === "custom-art"
+                      }
+                      maxLength="2000"
+                      placeholder={
+                        requestFormType === "contact"
+                          ? "Describe your reason for contacting the artist (optional)"
+                          : "Describe the customized MicroArt you would like"
+                      }
                       rows="5"
                     />
 
                   </div>
 
                   <button type="submit">
-                    Submit Request
+                    {requestFormType === "contact"
+                      ? "Send Message"
+                      : "Submit Request"}
                   </button>
 
                 </form>
@@ -5079,27 +5123,30 @@ function App() {
                 </div>
 
                 <h2>
-                  Request Submitted!
+                  {requestFormType === "contact"
+                    ? "Message Sent!"
+                    : "Request Submitted!"}
                 </h2>
 
                 <p>
-                  Thank you for your interest
-                  in customized MicroArt.
+                  {requestFormType === "contact"
+                    ? "Thank you for contacting MicroArts."
+                    : "Thank you for your interest in customized MicroArt."}
                 </p>
 
                 <p>
-                  The artist will contact you
-                  to discuss your customized
-                  art ideas and how they can
-                  be implemented.
+                  {requestFormType === "contact"
+                    ? "The artist will contact you using the phone number or email you provided."
+                    : "The artist will contact you to discuss your customized art ideas and how they can be implemented."}
                 </p>
 
                 <button
-                  onClick={() =>
-                    setShowRequestForm(
-                      false
-                    )
-                  }
+                  onClick={() => {
+                    setShowRequestForm(false)
+                    setRequestSubmitted(false)
+                    setCustomRequestArtwork(null)
+                    setRequestFormType("custom-art")
+                  }}
                 >
                   Close
                 </button>

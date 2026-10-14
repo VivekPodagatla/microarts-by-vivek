@@ -23,19 +23,33 @@ const customRequestSchema = new mongoose.Schema(
 
     requestDetails: {
       type: String,
-      required: true,
       trim: true,
+      default: "",
+    },
+
+    requestType: {
+      type: String,
+      enum: [
+        "custom-art",
+        "contact",
+      ],
+      default: "custom-art",
     },
 
     artworkId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Artwork",
-      required: true,
+      default: null,
     },
 
     status: {
       type: String,
-      enum: ["Pending", "In Progress", "Completed", "Cancelled"],
+      enum: [
+        "Pending",
+        "In Progress",
+        "Completed",
+        "Cancelled",
+      ],
       default: "Pending",
     },
   },
@@ -44,4 +58,7 @@ const customRequestSchema = new mongoose.Schema(
   }
 )
 
-module.exports = mongoose.model("CustomRequest", customRequestSchema)
+module.exports = mongoose.model(
+  "CustomRequest",
+  customRequestSchema
+)

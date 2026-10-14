@@ -6558,3 +6558,14 @@ button {
   }
 
 }
+
+/* ================= MOBILE HERO - SHOW FULL IMAGE ================= */
+
+@media (max-width: 600px) {
+  .hero-image img {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+  }
+}

@@ -18,7 +18,7 @@ const router = express.Router()
 
 
 // =====================================================
-// ARTIST - GET ALL CUSTOM ART REQUESTS
+// ARTIST - GET ALL CUSTOM ART / CONTACT REQUESTS
 // =====================================================
 
 router.get(
@@ -46,7 +46,7 @@ router.get(
     } catch (error) {
 
       console.error(
-        "Get custom requests error:",
+        "Get requests error:",
         error
       )
 
@@ -54,7 +54,7 @@ router.get(
       return res.status(500).json({
         success: false,
         message:
-          "Failed to fetch custom requests.",
+          "Failed to fetch requests.",
       })
     }
   }
@@ -62,7 +62,7 @@ router.get(
 
 
 // =====================================================
-// PUBLIC - SUBMIT CUSTOM ART REQUEST
+// PUBLIC - SUBMIT CUSTOM ART / CONTACT REQUEST
 // No customer login required
 // =====================================================
 
@@ -77,6 +77,7 @@ router.post(
         email,
         requestDetails,
         artworkId,
+        requestType,
       } = req.body
 
 
@@ -99,20 +100,46 @@ router.post(
       const cleanArtworkId =
         String(artworkId || "").trim()
 
+      const cleanRequestType =
+        String(
+          requestType || "custom-art"
+        )
+          .trim()
+          .toLowerCase()
+
+
+      // ================= REQUEST TYPE =================
+
+      const allowedRequestTypes = [
+        "custom-art",
+        "contact",
+      ]
+
+
+      if (
+        !allowedRequestTypes.includes(
+          cleanRequestType
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Invalid request type.",
+        })
+      }
+
 
       // ================= REQUIRED FIELDS =================
 
       if (
         !cleanName ||
         !cleanPhone ||
-        !cleanEmail ||
-        !cleanRequestDetails ||
-        !cleanArtworkId
+        !cleanEmail
       ) {
         return res.status(400).json({
           success: false,
           message:
-            "All fields are required.",
+            "Name, phone, and email are required.",
         })
       }
 
@@ -172,53 +199,95 @@ router.post(
 
       // ================= REQUEST DETAILS VALIDATION =================
 
+      // Custom artwork requests require details.
+
       if (
-        cleanRequestDetails.length < 5 ||
+        cleanRequestType === "custom-art" &&
+        (
+          cleanRequestDetails.length < 5 ||
+          cleanRequestDetails.length > 2000
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Please describe the customized MicroArt you would like.",
+        })
+      }
+
+
+      // General contact reason is optional.
+
+      if (
+        cleanRequestType === "contact" &&
         cleanRequestDetails.length > 2000
       ) {
         return res.status(400).json({
           success: false,
           message:
-            "Request details must be between 5 and 2000 characters.",
+            "Your message cannot exceed 2000 characters.",
         })
       }
 
 
-      // ================= ARTWORK ID VALIDATION =================
+      // ================= OPTIONAL ARTWORK =================
+
+      let artwork = null
+
+
+      /*
+        General contact:
+        No artwork should be attached.
+
+        Custom art:
+        An artwork may be attached if the customer
+        is requesting customization of an existing piece.
+
+        A completely new custom-art idea can also
+        be submitted without an artwork.
+      */
 
       if (
-        !mongoose.Types.ObjectId.isValid(
-          cleanArtworkId
-        )
+        cleanRequestType === "custom-art" &&
+        cleanArtworkId
       ) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Invalid artwork.",
-        })
-      }
+
+        // Validate MongoDB artwork ID
+
+        if (
+          !mongoose.Types.ObjectId.isValid(
+            cleanArtworkId
+          )
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Invalid artwork.",
+          })
+        }
 
 
-      // ================= VERIFY ARTWORK EXISTS =================
+        // Verify artwork exists
 
-      const artwork =
-        await Artwork.findById(
-          cleanArtworkId
-        )
+        artwork =
+          await Artwork.findById(
+            cleanArtworkId
+          )
 
 
-      if (!artwork) {
-        return res.status(404).json({
-          success: false,
-          message:
-            "The selected artwork could not be found.",
-        })
+        if (!artwork) {
+          return res.status(404).json({
+            success: false,
+            message:
+              "The selected artwork could not be found.",
+          })
+        }
       }
 
 
       // ================= CREATE REQUEST =================
 
-      const customRequest =
+      const newRequest =
         await CustomRequest.create({
           fullName:
             cleanName,
@@ -232,9 +301,22 @@ router.post(
           requestDetails:
             cleanRequestDetails,
 
+          requestType:
+            cleanRequestType,
+
           artworkId:
-            artwork._id,
+            artwork
+              ? artwork._id
+              : null,
         })
+
+
+      // ================= SUCCESS MESSAGE =================
+
+      const successMessage =
+        cleanRequestType === "contact"
+          ? "Message sent successfully."
+          : "Custom art request submitted successfully."
 
 
       // ================= SUCCESS =================
@@ -243,16 +325,16 @@ router.post(
         success: true,
 
         message:
-          "Custom art request submitted successfully.",
+          successMessage,
 
         request:
-          customRequest,
+          newRequest,
       })
 
     } catch (error) {
 
       console.error(
-        "Custom request error:",
+        "Request submission error:",
         error
       )
 
@@ -260,7 +342,7 @@ router.post(
       return res.status(500).json({
         success: false,
         message:
-          "Failed to submit custom art request.",
+          "Failed to submit your request.",
       })
     }
   }
@@ -268,7 +350,7 @@ router.post(
 
 
 // =====================================================
-// ARTIST - UPDATE CUSTOM REQUEST STATUS
+// ARTIST - UPDATE REQUEST STATUS
 // =====================================================
 
 router.patch(
@@ -288,7 +370,7 @@ router.patch(
         return res.status(400).json({
           success: false,
           message:
-            "Invalid custom request.",
+            "Invalid request.",
         })
       }
 
@@ -346,7 +428,7 @@ router.patch(
         return res.status(404).json({
           success: false,
           message:
-            "Custom request not found.",
+            "Request not found.",
         })
       }
 
@@ -365,7 +447,7 @@ router.patch(
     } catch (error) {
 
       console.error(
-        "Update custom request error:",
+        "Update request error:",
         error
       )
 
