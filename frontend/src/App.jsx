@@ -4755,7 +4755,7 @@ function App() {
               <div className="hero-image">
 
                 <img
-                  src="/images/couple-under-umbrella.jpg"
+                  src="/images/couple-under-umbrella-hero.jpg"
                   alt="Miniature couple under an umbrella carved from a pencil"
                   draggable="false"
                 />
