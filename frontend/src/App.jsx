@@ -231,6 +231,82 @@ function App() {
 
   const [personalizedProducts, setPersonalizedProducts] = useState([])
   const [selectedPersonalizedProduct,setSelectedPersonalizedProduct,] = useState(null)
+  // ================= BROWSER BACK BUTTON =================
+
+  useEffect(() => {
+    if (!window.history.state?.microartsView) {
+      window.history.replaceState(
+        {
+          microartsView: "home",
+        },
+        "",
+        window.location.href
+      )
+    }
+
+    const handleBrowserBack = (event) => {
+      const view =
+        event.state?.microartsView || "home"
+
+      // Close detail pages
+      setSelectedArtwork(null)
+      setShowProduct(false)
+      setSelectedPersonalizedProduct(null)
+
+      // Close other screens
+      setShowCart(false)
+      setShowLogin(false)
+      setShowArtistDashboard(false)
+      setShowCheckout(false)
+      setShowRequestForm(false)
+
+      setCustomText("")
+
+      if (view === "personalized") {
+        setShowPersonalized(true)
+
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        })
+
+        return
+      }
+
+      // Default = Home
+      setShowPersonalized(false)
+
+      setTimeout(() => {
+        if (
+          event.state?.returnTo === "gallery"
+        ) {
+          document
+            .getElementById("gallery")
+            ?.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            })
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+          })
+        }
+      }, 50)
+    }
+
+    window.addEventListener(
+      "popstate",
+      handleBrowserBack
+    )
+
+    return () => {
+      window.removeEventListener(
+        "popstate",
+        handleBrowserBack
+      )
+    }
+  }, [])
   const [showAddProductForm, setShowAddProductForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
 
@@ -442,6 +518,18 @@ function App() {
   }
 
   const openPersonalized = async () => {
+    if (
+      window.history.state?.microartsView !==
+      "personalized"
+    ) {
+      window.history.pushState(
+        {
+          microartsView: "personalized",
+        },
+        "",
+        window.location.href
+      )
+    }
     setShowCart(false)
     setShowProduct(false)
     setShowLogin(false)
@@ -1187,6 +1275,24 @@ function App() {
   // ================= ARTWORK DETAIL =================
 
   const openArtwork = (artwork) => {
+    window.history.replaceState(
+      {
+        ...window.history.state,
+        microartsView: "home",
+        returnTo: "gallery",
+      },
+      "",
+      window.location.href
+    )
+
+    window.history.pushState(
+      {
+        microartsView: "artwork",
+      },
+      "",
+      window.location.href
+    )
+
     setSelectedArtwork(artwork)
 
     setShowCart(false)
@@ -1201,6 +1307,14 @@ function App() {
   }
 
   const backToGallery = () => {
+    if (
+      window.history.state?.microartsView ===
+      "artwork"
+    ) {
+      window.history.back()
+      return
+    }
+
     setSelectedArtwork(null)
 
     setTimeout(() => {
@@ -4377,9 +4491,7 @@ function App() {
           <button
             className="back-button"
             onClick={() => {
-              setShowProduct(false)
-              setSelectedPersonalizedProduct(null)
-              setCustomText("")
+              window.history.back()
             }}
           >
             ← Back to Personalized Gifts
@@ -4542,6 +4654,14 @@ function App() {
                   className="personalized-card"
                   key={product._id}
                   onClick={() => {
+                    window.history.pushState(
+                      {
+                        microartsView: "product",
+                      },
+                      "",
+                      window.location.href
+                    )
+
                     setCustomText("")
                     setSelectedPersonalizedProduct(product)
                     setShowProduct(true)
@@ -4637,6 +4757,7 @@ function App() {
                 <img
                   src="/images/couple-under-umbrella.jpg"
                   alt="Miniature couple under an umbrella carved from a pencil"
+                  draggable="false"
                 />
 
                 

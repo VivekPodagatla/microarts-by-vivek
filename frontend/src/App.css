@@ -6569,3 +6569,15 @@ button {
     object-fit: contain;
   }
 }
+/* ================= MOBILE HERO TOUCH FIX ================= */
+
+.hero-image {
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.hero-image img {
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+  pointer-events: none;
+}
