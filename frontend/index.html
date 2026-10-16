@@ -1,14 +1,15 @@
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="512x512"
-      href="/microarts-favicon.png?v=2"
+
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
     />
 
+    <!-- Website favicon -->
     <link
       rel="icon"
       type="image/png"
@@ -19,9 +20,102 @@
       rel="apple-touch-icon"
       href="/images/microarts-favicon.png?v=3"
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MicroArts by Vivek</title>
+
+    <!-- Primary SEO -->
+    <title>MicroArts by Vivek | Miniature Pencil Carvings & Custom Art</title>
+
+    <meta
+      name="description"
+      content="Discover handmade miniature art by Vivek Podagatla, featuring pencil carvings, rice grain paintings, graphite sculptures, and personalized miniature gifts."
+    />
+
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large"
+    />
+
+    <link
+      rel="canonical"
+      href="https://microartsbyvivek.com/"
+    />
+
+    <!-- Social sharing: Open Graph -->
+    <meta
+      property="og:type"
+      content="website"
+    />
+
+    <meta
+      property="og:site_name"
+      content="MicroArts by Vivek"
+    />
+
+    <meta
+      property="og:title"
+      content="MicroArts by Vivek | Handmade Miniature Art"
+    />
+
+    <meta
+      property="og:description"
+      content="Explore incredible handmade miniature pencil carvings, rice grain paintings, and personalized micro artworks by artist Vivek Podagatla."
+    />
+
+    <meta
+      property="og:url"
+      content="https://microartsbyvivek.com/"
+    />
+
+    <!-- Twitter / X sharing -->
+    <meta
+      name="twitter:card"
+      content="summary"
+    />
+
+    <meta
+      name="twitter:title"
+      content="MicroArts by Vivek | Miniature Art"
+    />
+
+    <meta
+      name="twitter:description"
+      content="Explore miniature pencil carvings, rice grain paintings, and personalized handmade micro art by Vivek Podagatla."
+    />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://microartsbyvivek.com/#website",
+          "url": "https://microartsbyvivek.com/",
+          "name": "MicroArts by Vivek",
+          "description": "Handmade miniature artworks, pencil carvings, and personalized micro art by Vivek Podagatla.",
+          "inLanguage": "en",
+          "creator": {
+            "@id": "https://microartsbyvivek.com/#artist"
+          }
+        },
+        {
+          "@type": "Person",
+          "@id": "https://microartsbyvivek.com/#artist",
+          "name": "Vivek Podagatla",
+          "url": "https://microartsbyvivek.com/",
+          "jobTitle": "Miniature Artist",
+          "knowsAbout": [
+            "Miniature Art",
+            "Pencil Carving",
+            "Rice Grain Painting",
+            "Graphite Miniature Sculpture",
+            "Personalized Miniature Art"
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
+
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
