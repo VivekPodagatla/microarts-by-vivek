@@ -6,3 +6,5 @@ build/
 Thumbs.db
 backend/uploads/
 backend/uploads_backup/
+.vercel
+.env*

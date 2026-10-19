@@ -36,6 +36,36 @@ const getArtworkImageUrl = (image) => {
   return image
 }
 
+const getArtworkSlugFromUrl = () => {
+  const match = window.location.pathname.match(
+    /^\/artworks\/([^/]+)\/?$/
+  )
+
+  if (!match) {
+    return null
+  }
+
+  try {
+    return decodeURIComponent(match[1])
+  } catch {
+    return null
+  }
+}
+const getGiftSlugFromUrl = () => {
+  const match = window.location.pathname.match(
+    /^\/gifts\/([^/]+)\/?$/
+  )
+
+  if (!match) {
+    return null
+  }
+
+  try {
+    return decodeURIComponent(match[1])
+  } catch {
+    return null
+  }
+}
 
 function App() {
   const [artworks, setArtworks] = useState([])
@@ -73,10 +103,6 @@ function App() {
     loadArtworks()
   }, [])
 
-
-
-
-
   const loadPersonalizedProducts = async () => {
     setPersonalizedLoading(true)
     setPersonalizedError(false)
@@ -109,7 +135,7 @@ function App() {
     loadPersonalizedProducts()
   }, [])
 
-
+  // ================= PERSONALIZED GIFT URL LOADING =================
 
   const [selectedArtwork, setSelectedArtwork] =
     useState(null)
@@ -249,13 +275,82 @@ function App() {
   const [personalizedError, setPersonalizedError] = useState(false)
 
   const [selectedPersonalizedProduct,setSelectedPersonalizedProduct,] = useState(null)
+  useEffect(() => {
+    if (artworksLoading || artworks.length === 0) {
+      return
+    }
+
+    const slug = getArtworkSlugFromUrl()
+
+    if (!slug) {
+      return
+    }
+
+    const artwork = artworks.find(
+      (item) => item.slug === slug
+    )
+
+    if (!artwork) {
+      console.warn(
+        "Artwork not found for URL:",
+        slug
+      )
+      return
+    }
+
+    setSelectedArtwork(artwork)
+    setShowPersonalized(false)
+    setShowProduct(false)
+
+  }, [artworks, artworksLoading])
+
+  useEffect(() => {
+    if (personalizedLoading) {
+      return
+    }
+
+    const slug = getGiftSlugFromUrl()
+
+    if (!slug) {
+      return
+    }
+
+    const product = personalizedProducts.find(
+      (item) => item.slug === slug
+    )
+
+    if (!product) {
+      console.warn(
+        "Personalized Gift not found for URL:",
+        slug
+      )
+      return
+    }
+
+    setSelectedPersonalizedProduct(product)
+    setShowProduct(true)
+    setShowPersonalized(false)
+    setSelectedArtwork(null)
+
+  }, [personalizedProducts, personalizedLoading])
   // ================= BROWSER BACK BUTTON =================
 
   useEffect(() => {
     if (!window.history.state?.microartsView) {
+      const artworkSlug = getArtworkSlugFromUrl()
+      const giftSlug = getGiftSlugFromUrl()
+
+      const initialView = artworkSlug
+        ? "artwork"
+        : giftSlug
+          ? "product"
+          : "home"
+
       window.history.replaceState(
         {
-          microartsView: "home",
+          microartsView: initialView,
+          ...(artworkSlug ? { slug: artworkSlug } : {}),
+          ...(giftSlug ? { slug: giftSlug } : {}),
         },
         "",
         window.location.href
@@ -265,6 +360,62 @@ function App() {
     const handleBrowserBack = (event) => {
       const view =
         event.state?.microartsView || "home"
+        const artworkSlug = getArtworkSlugFromUrl()
+
+        if (artworkSlug) {
+          const artwork = artworks.find(
+            (item) => item.slug === artworkSlug
+          )
+
+          if (artwork) {
+            setSelectedArtwork(artwork)
+            setShowProduct(false)
+            setSelectedPersonalizedProduct(null)
+            setShowPersonalized(false)
+            setShowCart(false)
+            setShowLogin(false)
+            setShowArtistDashboard(false)
+            setShowCheckout(false)
+            setShowRequestForm(false)
+
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            })
+
+            return
+          }
+        }
+
+        // ================= PERSONALIZED GIFT URL NAVIGATION =================
+
+        const giftSlug = getGiftSlugFromUrl()
+
+        if (giftSlug) {
+          const product = personalizedProducts.find(
+            (item) => item.slug === giftSlug
+          )
+
+          if (product) {
+            setSelectedPersonalizedProduct(product)
+            setShowProduct(true)
+            setSelectedArtwork(null)
+            setShowPersonalized(false)
+
+            setShowCart(false)
+            setShowLogin(false)
+            setShowArtistDashboard(false)
+            setShowCheckout(false)
+            setShowRequestForm(false)
+
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            })
+
+            return
+          }
+        }
 
       // Close detail pages
       setSelectedArtwork(null)
@@ -324,7 +475,7 @@ function App() {
         handleBrowserBack
       )
     }
-  }, [])
+  }, [artworks, personalizedProducts])
   const [showAddProductForm, setShowAddProductForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
 
@@ -509,6 +660,17 @@ function App() {
   // ================= NAVIGATION =================
 
   const goHome = () => {
+    // ================= RESET HOME URL =================
+
+    if (window.location.pathname !== "/") {
+      window.history.pushState(
+        {
+          microartsView: "home",
+        },
+        "",
+        "/"
+      )
+    }
     setShowCart(false)
     setShowProduct(false)
     setShowPersonalized(false)
@@ -537,15 +699,15 @@ function App() {
 
   const openPersonalized = async () => {
     if (
-      window.history.state?.microartsView !==
-      "personalized"
+      window.history.state?.microartsView !== "personalized" ||
+      window.location.pathname !== "/"
     ) {
       window.history.pushState(
         {
           microartsView: "personalized",
         },
         "",
-        window.location.href
+        "/"
       )
     }
     setShowCart(false)
@@ -1338,6 +1500,14 @@ function App() {
   // ================= ARTWORK DETAIL =================
 
   const openArtwork = (artwork) => {
+    if (!artwork.slug) {
+      console.error(
+        "Artwork does not have a URL slug:",
+        artwork.title
+      )
+      return
+    }
+
     window.history.replaceState(
       {
         ...window.history.state,
@@ -1351,9 +1521,10 @@ function App() {
     window.history.pushState(
       {
         microartsView: "artwork",
+        slug: artwork.slug,
       },
       "",
-      window.location.href
+      `/artworks/${encodeURIComponent(artwork.slug)}`
     )
 
     setSelectedArtwork(artwork)
@@ -1370,16 +1541,22 @@ function App() {
   }
 
   const backToGallery = () => {
-    if (
-      window.history.state?.microartsView ===
-      "artwork"
-    ) {
-      window.history.back()
-      return
+    // Return to the homepage URL
+    if (window.location.pathname !== "/") {
+      window.history.pushState(
+        {
+          microartsView: "home",
+          returnTo: "gallery",
+        },
+        "",
+        "/"
+      )
     }
 
+    // Close the artwork detail page
     setSelectedArtwork(null)
 
+    // Scroll to the gallery
     setTimeout(() => {
       document
         .getElementById("gallery")
@@ -4575,9 +4752,7 @@ function App() {
 
           <button
             className="back-button"
-            onClick={() => {
-              window.history.back()
-            }}
+            onClick={openPersonalized}
           >
             ← Back to Personalized Gifts
           </button>
@@ -4765,17 +4940,31 @@ function App() {
                   className="personalized-card"
                   key={product._id}
                   onClick={() => {
+                    if (!product.slug) {
+                      console.error(
+                        "Personalized product has no slug:",
+                        product.title
+                      )
+                      return
+                    }
+
                     window.history.pushState(
                       {
                         microartsView: "product",
+                        slug: product.slug,
                       },
                       "",
-                      window.location.href
+                      `/gifts/${encodeURIComponent(product.slug)}`
                     )
 
                     setCustomText("")
                     setSelectedPersonalizedProduct(product)
                     setShowProduct(true)
+
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    })
                   }}
                 >
 

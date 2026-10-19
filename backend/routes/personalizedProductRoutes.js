@@ -4,6 +4,9 @@ const express =
 const PersonalizedProduct =
   require("../models/PersonalizedProduct")
 
+const { generateUniqueSlug } =
+  require("../utils/productSlug")
+
 const authMiddleware =
   require("../middleware/authMiddleware")
 
@@ -63,7 +66,40 @@ router.get(
     }
   }
 )
+// =====================================================
+// PUBLIC - GET PERSONALIZED PRODUCT BY SLUG
+// =====================================================
 
+router.get(
+  "/slug/:slug",
+  async (req, res) => {
+    try {
+      const product =
+        await PersonalizedProduct.findOne({
+          slug: req.params.slug,
+          active: true,
+        })
+
+      if (!product) {
+        return res.status(404).json({
+          message: "Personalized product not found",
+        })
+      }
+
+      return res.json(product)
+
+    } catch (error) {
+      console.error(
+        "Get personalized product by slug error:",
+        error
+      )
+
+      return res.status(500).json({
+        message: "Failed to fetch personalized product",
+      })
+    }
+  }
+)
 
 // =====================================================
 // ARTIST - GET ALL PERSONALIZED PRODUCTS
@@ -205,8 +241,14 @@ router.post(
 
       // ================= CREATE PRODUCT =================
 
+      const slug = await generateUniqueSlug(
+        title,
+        PersonalizedProduct
+      )
+
       const product =
         await PersonalizedProduct.create({
+          slug,
 
           title:
             title.trim(),

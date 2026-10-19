@@ -6,6 +6,8 @@ const mongoose =
 
 const Artwork =
   require("../models/Artwork")
+const { generateUniqueSlug } =
+  require("../utils/productSlug")
 
 const authMiddleware =
   require("../middleware/authMiddleware")
@@ -108,6 +110,46 @@ router.get(
   }
 )
 
+// =====================================================
+// PUBLIC - GET ARTWORK BY SLUG
+// =====================================================
+
+router.get(
+  "/slug/:slug",
+  async (req, res) => {
+    try {
+
+      const artwork =
+        await Artwork.findOne({
+          slug: req.params.slug,
+        })
+
+      if (!artwork) {
+        return res.status(404).json({
+          success: false,
+          message: "Artwork not found",
+        })
+      }
+
+      return res.json({
+        success: true,
+        artwork,
+      })
+
+    } catch (error) {
+
+      console.error(
+        "Get artwork by slug error:",
+        error
+      )
+
+      return res.status(500).json({
+        success: false,
+        message: "Server error",
+      })
+    }
+  }
+)
 
 // =====================================================
 // PUBLIC - GET ONE ARTWORK
@@ -251,11 +293,20 @@ router.post(
 
       // ================= CREATE ARTWORK =================
 
+      // ================= CREATE ARTWORK =================
+
+      const slug = await generateUniqueSlug(
+        cleanTitle,
+        Artwork
+      )
+
       const artwork =
         await Artwork.create({
 
           title:
             cleanTitle,
+
+          slug,
 
           description:
             cleanDescription,

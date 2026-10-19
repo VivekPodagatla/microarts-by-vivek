@@ -1,0 +1,14 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/artworks/:slug",
+      "destination": "/artworks/:slug/index"
+    },
+    {
+      "source": "/gifts/:slug",
+      "destination": "/gifts/:slug/index"
+    }
+  ]
+}
