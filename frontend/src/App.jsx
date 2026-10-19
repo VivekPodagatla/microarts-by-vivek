@@ -36,66 +36,80 @@ const getArtworkImageUrl = (image) => {
   return image
 }
 
+
 function App() {
   const [artworks, setArtworks] = useState([])
+  const [artworksLoading, setArtworksLoading] = useState(true)
+  const [artworksError, setArtworksError] = useState(false)
+
+
+  const loadArtworks = async () => {
+    setArtworksLoading(true)
+    setArtworksError(false)
+
+    try {
+      const response = await fetch(`${API_URL}/api/artworks`)
+
+      if (!response.ok) {
+        throw new Error("Failed to load artworks")
+      }
+
+      const data = await response.json()
+
+      if (!Array.isArray(data.artworks)) {
+        throw new Error("Invalid artworks response")
+      }
+
+      setArtworks(data.artworks)
+    } catch (error) {
+      console.error("Artwork loading error:", error)
+      setArtworksError(true)
+    } finally {
+      setArtworksLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const loadArtworks = async () => {
-      try {
-        const response = await fetch(
-          `${API_URL}/api/artworks`
-        )
-
-        const data = await response.json()
-
-        if (!response.ok) {
-          console.error(
-            "Failed to load artworks:",
-            data.message
-          )
-          return
-        }
-
-        setArtworks(data.artworks)
-      } catch (error) {
-        console.error(
-          "Artwork loading error:",
-          error
-        )
-      }
-    }
-
     loadArtworks()
   }, [])
 
-  useEffect(() => {
-    const loadPersonalizedProducts = async () => {
-      try {
-        const response = await fetch(
-          `${API_URL}/api/personalized-products`
-        )
 
-        const data = await response.json()
 
-        if (!response.ok) {
-          console.error(
-            "Failed to load personalized products:",
-            data.message
-          )
-          return
-        }
 
-        setPersonalizedProducts(data)
-      } catch (error) {
-        console.error(
-          "Personalized products loading error:",
-          error
-        )
+
+  const loadPersonalizedProducts = async () => {
+    setPersonalizedLoading(true)
+    setPersonalizedError(false)
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/personalized-products`
+      )
+
+      if (!response.ok) {
+        throw new Error("Failed to load personalized products")
       }
-    }
 
-  loadPersonalizedProducts()
-}, [])
+      const data = await response.json()
+
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid personalized products response")
+      }
+
+      setPersonalizedProducts(data)
+    } catch (error) {
+      console.error("Personalized products loading error:", error)
+      setPersonalizedError(true)
+    } finally {
+      setPersonalizedLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadPersonalizedProducts()
+  }, [])
+
+
 
   const [selectedArtwork, setSelectedArtwork] =
     useState(null)
@@ -121,7 +135,7 @@ function App() {
   const [customText, setCustomText] =
     useState("")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  
+
 
   // ================= AUTH PROFILE =================
 
@@ -230,6 +244,10 @@ function App() {
   const [orders, setOrders] = useState([])
 
   const [personalizedProducts, setPersonalizedProducts] = useState([])
+
+  const [personalizedLoading, setPersonalizedLoading] = useState(true)
+  const [personalizedError, setPersonalizedError] = useState(false)
+
   const [selectedPersonalizedProduct,setSelectedPersonalizedProduct,] = useState(null)
   // ================= BROWSER BACK BUTTON =================
 
@@ -486,7 +504,7 @@ function App() {
 
   const letterCount =
     customText.replace(/\s/g, "").length
-  
+
 
   // ================= NAVIGATION =================
 
@@ -542,33 +560,7 @@ function App() {
 
     setSelectedArtwork(null)
 
-    try {
-      const response = await fetch(
-        `${API_URL}/api/personalized-products`
-      )
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        showNotification(
-          data.message ||
-            "Failed to load personalized products"
-        )
-        return
-      }
-
-      setPersonalizedProducts(data)
-
-    } catch (error) {
-      console.error(
-        "Personalized products loading error:",
-        error
-      )
-
-      showNotification(
-        "Unable to load personalized products."
-      )
-    }
 
     window.scrollTo({
       top: 0,
@@ -704,6 +696,76 @@ function App() {
       )
     }
   }
+
+  // Artist-only deletion; uses the existing MicroArts confirmation modal.
+  const deleteCustomRequest = async (requestId) => {
+    const confirmed = await showConfirm({
+      title: "Delete Custom Request?",
+      message: "Are you sure you want to permanently delete this customer request? This action cannot be undone.",
+      confirmText: "Delete Request",
+      cancelText: "Cancel",
+      danger: true,
+    })
+
+    if (!confirmed) return
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/custom-requests/${requestId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      )
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete request.")
+      }
+      setCustomRequests((currentRequests) =>
+        currentRequests.filter((request) => request._id !== requestId)
+      )
+      showNotification("Request deleted successfully.")
+    } catch (error) {
+      console.error("Delete custom request error:", error)
+      showNotification(error.message || "Unable to delete request.")
+    }
+  }
+
+  // Requires a matching artist-protected DELETE /api/orders/:id route.
+  const deletePersonalizedOrder = async (orderId) => {
+    const confirmed = await showConfirm({
+      title: "Delete Personalized Gift Request?",
+      message: "Are you sure you want to permanently delete this personalized gift request? This action cannot be undone.",
+      confirmText: "Delete Request",
+      cancelText: "Cancel",
+      danger: true,
+    })
+
+    if (!confirmed) return
+
+    try {
+      const response = await fetch(`${API_URL}/api/orders/${orderId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      })
+      const data = await response.json()
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete personalized gift request.")
+      }
+      setOrders((currentOrders) =>
+        currentOrders.filter((order) => order._id !== orderId)
+      )
+      showNotification("Personalized gift request deleted successfully.")
+    } catch (error) {
+      console.error("Delete personalized gift request error:", error)
+      showNotification(error.message || "Unable to delete personalized gift request.")
+    }
+  }
+
   const updateRequestStatus = async (requestId, newStatus) => {
     try {
       const response = await fetch(
@@ -1271,6 +1333,7 @@ function App() {
         )
       }
     )
+
 
   // ================= ARTWORK DETAIL =================
 
@@ -3043,11 +3106,11 @@ function App() {
                 </button>
 
 
-                <button 
-                  className="dashboard-option-card" 
-                  onClick={() => 
-                    setArtistDashboardSection("products") 
-                  } 
+                <button
+                  className="dashboard-option-card"
+                  onClick={() =>
+                    setArtistDashboardSection("products")
+                  }
                 >
 
                   <span className="dashboard-option-icon">
@@ -3248,9 +3311,21 @@ function App() {
 
                         </select>
 
+
+                      </div>
+
+                      <div className="request-actions">
+                        <button
+                          type="button"
+                          className="delete-request-btn"
+                          onClick={() => deleteCustomRequest(request._id)}
+                        >
+                          Delete Request
+                        </button>
                       </div>
 
                     </article>
+
 
                   ))}
 
@@ -3537,6 +3612,16 @@ function App() {
 
                         </div>
 
+                      </div>
+
+                      <div className="request-actions">
+                        <button
+                          type="button"
+                          className="delete-request-btn"
+                          onClick={() => deletePersonalizedOrder(order._id)}
+                        >
+                          Delete Request
+                        </button>
                       </div>
 
                     </article>
@@ -4631,9 +4716,35 @@ function App() {
 
           <div className="personalized-products">
 
-            {personalizedProducts.length === 0 ? (
 
-              <div className="empty-personalized-products">
+            {personalizedLoading ? (
+              <div className="gallery-loading" role="status" style={{ gridColumn: "1 / -1" }}>
+                <h3>Loading Personalized MicroArts...</h3>
+                <p>
+                  Our gallery is waking up. This may take around
+                  60 seconds or longer.
+                </p>
+                <p>Your personalized artworks will appear automatically.</p>
+              </div>
+            ) : personalizedError ? (
+
+              <div className="gallery-loading" role="alert" style={{ gridColumn: "1 / -1" }}>
+                <h3>Unable to Load Personalized MicroArts</h3>
+
+                <p>Please try again in a moment.</p>
+
+                <button
+                  type="button"
+                  onClick={loadPersonalizedProducts}
+                >
+                  Try Again
+                </button>
+              </div>
+
+            ) : personalizedProducts.length === 0 ? (
+
+
+              <div className="empty-personalized-products" style={{ gridColumn: "1 / -1" }}>
 
                 <h3>
                   No Personalized MicroArts Available
@@ -4668,20 +4779,24 @@ function App() {
                   }}
                 >
 
-                  <img
-                    src={getImageUrl(product.image)}
-                    alt={product.title}
-                  />
+
+                  <div className="artwork-image-container">
+                    <img
+                      src={getImageUrl(product.image)}
+                      alt={product.title}
+                      loading="lazy"
+                      onLoad={(event) => {
+                        event.currentTarget.classList.add("image-loaded")
+                      }}
+                    />
+                  </div>
+
 
                   <div className="personalized-info">
 
                     <h3>
                       {product.title}
                     </h3>
-
-                    <p>
-                      {product.description}
-                    </p>
 
                     <p className="personalized-price">
                       <span>Starting at</span>
@@ -4760,7 +4875,7 @@ function App() {
                   draggable="false"
                 />
 
-                
+
 
               </div>
 
@@ -4768,16 +4883,14 @@ function App() {
 
           </section>
 
-          {/* GALLERY */}
+
+          {/* ================= GALLERY ================= */}
 
           <section
             id="gallery"
             className="section gallery-section"
           >
-
-            <h2>
-              Featured MicroArts
-            </h2>
+            <h2>Featured MicroArts</h2>
 
             <p className="section-description">
               Explore miniature artworks created
@@ -4786,15 +4899,52 @@ function App() {
 
             <div className="products">
 
-              {displayedArtworks.map(
-                (artwork) => (
+              {artworksLoading ? (
+
+                <div className="gallery-loading" role="status" style={{ gridColumn: "1 / -1" }}>
+                  <h3>Loading Miniature Artworks...</h3>
+
+                  <p>
+                    Our gallery is waking up. This may take around
+                    60 seconds or longer.
+                  </p>
+
+                  <p>
+                    Your artworks will appear automatically.
+                  </p>
+                </div>
+
+              ) : artworksError ? (
+
+
+                <div className="gallery-loading" role="alert" style={{ gridColumn: "1 / -1" }}>
+                  <h3>Unable to Load Artworks</h3>
+
+                  <p>Please try again in a moment.</p>
+
+                  <button
+                    type="button"
+                    onClick={loadArtworks}
+                  >
+                    Try Again
+                  </button>
+                </div>
+
+
+              ) : displayedArtworks.length === 0 ? (
+
+                <div className="gallery-loading" style={{ gridColumn: "1 / -1" }}>
+                  <h3>No Artworks Available</h3>
+                </div>
+
+              ) : (
+
+                displayedArtworks.map((artwork) => (
 
                   <article
                     className="product-card"
                     key={artwork._id}
-                    onClick={() =>
-                      openArtwork(artwork)
-                    }
+                    onClick={() => openArtwork(artwork)}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(event) => {
@@ -4802,21 +4952,26 @@ function App() {
                         event.key === "Enter" ||
                         event.key === " "
                       ) {
+                        event.preventDefault()
                         openArtwork(artwork)
                       }
                     }}
                   >
 
-                    <img
-                      src={getArtworkImageUrl(artwork.image)}
-                      alt={artwork.title}
-                    />
+                    <div className="artwork-image-container">
+                      <img
+                        src={getArtworkImageUrl(artwork.image)}
+                        alt={artwork.title}
+                        loading="lazy"
+                        onLoad={(event) => {
+                          event.currentTarget.classList.add("image-loaded")
+                        }}
+                      />
+                    </div>
 
                     <div className="product-info">
 
-                      <h3>
-                        {artwork.title}
-                      </h3>
+                      <h3>{artwork.title}</h3>
 
                       <p className="product-size">
                         {artwork.size}
@@ -4826,12 +4981,14 @@ function App() {
 
                   </article>
 
-                )
+                ))
+
               )}
 
             </div>
 
           </section>
+
 
 
           {/* CUSTOMIZED ART */}
@@ -4869,7 +5026,7 @@ function App() {
           </section>
 
 
-          
+
 
           {/* ABOUT */}
 
@@ -5289,6 +5446,7 @@ function App() {
 
     </div>
   )
+
 }
 
 export default App

@@ -377,5 +377,52 @@ router.patch(
   }
 )
 
+/* =====================================================
+   ARTIST - DELETE PERSONALIZED ARTWORK REQUEST
+===================================================== */
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  artistMiddleware,
+  async (req, res) => {
+    try {
+      // Validate MongoDB order ID
+      if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid order ID.",
+        })
+      }
+
+      // Permanently delete the order
+      const deletedOrder = await Order.findByIdAndDelete(
+        req.params.id
+      )
+
+      if (!deletedOrder) {
+        return res.status(404).json({
+          success: false,
+          message: "Order not found.",
+        })
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Personalized artwork request deleted successfully.",
+      })
+
+    } catch (error) {
+      console.error("Delete order error:", error)
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete personalized artwork request.",
+      })
+    }
+  }
+)
+
+
 
 module.exports = router

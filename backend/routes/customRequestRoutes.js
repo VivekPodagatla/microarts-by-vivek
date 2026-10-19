@@ -462,4 +462,62 @@ router.patch(
 )
 
 
+/* =====================================================
+   ARTIST - DELETE CUSTOM ART / CONTACT REQUEST
+===================================================== */
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  artistMiddleware,
+  async (req, res) => {
+    try {
+
+      // Validate MongoDB request ID
+      if (
+        !mongoose.Types.ObjectId.isValid(
+          req.params.id
+        )
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid request ID.",
+        })
+      }
+
+      // Delete the request from MongoDB
+      const deletedRequest =
+        await CustomRequest.findByIdAndDelete(
+          req.params.id
+        )
+
+      // Request does not exist
+      if (!deletedRequest) {
+        return res.status(404).json({
+          success: false,
+          message: "Request not found.",
+        })
+      }
+
+      // Successfully deleted
+      return res.status(200).json({
+        success: true,
+        message: "Request deleted successfully.",
+      })
+
+    } catch (error) {
+
+      console.error(
+        "Delete custom request error:",
+        error
+      )
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to delete request.",
+      })
+    }
+  }
+)
+
 module.exports = router
