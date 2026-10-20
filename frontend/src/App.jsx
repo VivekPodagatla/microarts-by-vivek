@@ -4624,18 +4624,27 @@ function App() {
 
               </div>
 
-              <button
-                onClick={() => {
-                  setRequestFormType("custom-art")
-                  setCustomRequestArtwork(selectedArtwork)
-                  setSelectedArtwork(null)
+              <div className="custom-art-actions">
 
-                  setRequestSubmitted(false)
-                  setShowRequestForm(true)
-                }}
-              >
-                Request Customized Art
-              </button>
+                <button
+                  onClick={() => {
+                    setRequestFormType("custom-art")
+                    setCustomRequestArtwork(selectedArtwork)
+                    setSelectedArtwork(null)
+                    setRequestSubmitted(false)
+                    setShowRequestForm(true)
+                  }}
+                >
+                  Request Customized Art
+                </button>
+
+                <button
+                  onClick={openPersonalized}
+                >
+                  Explore Personalized Gifts
+                </button>
+
+              </div>
 
             </div>
 
@@ -5204,6 +5213,37 @@ function App() {
                   aria-hidden="true"
                 >
                   <path d="M13.5 22v-9h3l.5-3.5h-3.5V7.25c0-1 .28-1.75 1.8-1.75H17V2.38C16.7 2.34 15.67 2.25 14.45 2.25c-2.55 0-4.3 1.56-4.3 4.42V9.5H7.25V13h2.9v9h3.35z" />
+                </svg>
+              </a>
+              {/* YouTube */}
+              <a
+                href="https://youtube.com/@microartsvivek1657"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                title="YouTube"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z" />
+                </svg>
+              </a>
+
+              {/* TikTok */}
+              <a
+                href="https://www.tiktok.com/@vivekmicroartist"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                title="TikTok"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path d="M16.6 1h-3.4v14.3a3.3 3.3 0 1 1-2.9-3.3V8.5a6.8 6.8 0 1 0 6.3 6.8V8.1a8.7 8.7 0 0 0 5.1 1.6V6.3A5.2 5.2 0 0 1 16.6 1Z" />
                 </svg>
               </a>
 
