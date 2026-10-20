@@ -202,6 +202,14 @@ router.post("/", async (req, res) => {
             "One of the selected products is no longer available.",
         })
       }
+      // ================= STOCK AVAILABILITY CHECK =================
+
+      if (product.inStock === false) {
+        return res.status(409).json({
+          message:
+            `"${product.title}" is currently out of stock. Please remove it from your cart before submitting your order.`,
+        })
+      }
 
 
       // ================= PRICE CALCULATION =================

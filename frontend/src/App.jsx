@@ -36,43 +36,13 @@ const getArtworkImageUrl = (image) => {
   return image
 }
 
-const getArtworkSlugFromUrl = () => {
-  const match = window.location.pathname.match(
-    /^\/artworks\/([^/]+)\/?$/
-  )
-
-  if (!match) {
-    return null
-  }
-
-  try {
-    return decodeURIComponent(match[1])
-  } catch {
-    return null
-  }
-}
-const getGiftSlugFromUrl = () => {
-  const match = window.location.pathname.match(
-    /^\/gifts\/([^/]+)\/?$/
-  )
-
-  if (!match) {
-    return null
-  }
-
-  try {
-    return decodeURIComponent(match[1])
-  } catch {
-    return null
-  }
-}
 
 function App() {
   const [artworks, setArtworks] = useState([])
   const [artworksLoading, setArtworksLoading] = useState(true)
   const [artworksError, setArtworksError] = useState(false)
 
-
+  
   const loadArtworks = async () => {
     setArtworksLoading(true)
     setArtworksError(false)
@@ -103,6 +73,10 @@ function App() {
     loadArtworks()
   }, [])
 
+
+
+  
+  
   const loadPersonalizedProducts = async () => {
     setPersonalizedLoading(true)
     setPersonalizedError(false)
@@ -135,7 +109,7 @@ function App() {
     loadPersonalizedProducts()
   }, [])
 
-  // ================= PERSONALIZED GIFT URL LOADING =================
+
 
   const [selectedArtwork, setSelectedArtwork] =
     useState(null)
@@ -161,7 +135,7 @@ function App() {
   const [customText, setCustomText] =
     useState("")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
+  
 
   // ================= AUTH PROFILE =================
 
@@ -270,87 +244,18 @@ function App() {
   const [orders, setOrders] = useState([])
 
   const [personalizedProducts, setPersonalizedProducts] = useState([])
-
+  
   const [personalizedLoading, setPersonalizedLoading] = useState(true)
   const [personalizedError, setPersonalizedError] = useState(false)
 
   const [selectedPersonalizedProduct,setSelectedPersonalizedProduct,] = useState(null)
-  useEffect(() => {
-    if (artworksLoading || artworks.length === 0) {
-      return
-    }
-
-    const slug = getArtworkSlugFromUrl()
-
-    if (!slug) {
-      return
-    }
-
-    const artwork = artworks.find(
-      (item) => item.slug === slug
-    )
-
-    if (!artwork) {
-      console.warn(
-        "Artwork not found for URL:",
-        slug
-      )
-      return
-    }
-
-    setSelectedArtwork(artwork)
-    setShowPersonalized(false)
-    setShowProduct(false)
-
-  }, [artworks, artworksLoading])
-
-  useEffect(() => {
-    if (personalizedLoading) {
-      return
-    }
-
-    const slug = getGiftSlugFromUrl()
-
-    if (!slug) {
-      return
-    }
-
-    const product = personalizedProducts.find(
-      (item) => item.slug === slug
-    )
-
-    if (!product) {
-      console.warn(
-        "Personalized Gift not found for URL:",
-        slug
-      )
-      return
-    }
-
-    setSelectedPersonalizedProduct(product)
-    setShowProduct(true)
-    setShowPersonalized(false)
-    setSelectedArtwork(null)
-
-  }, [personalizedProducts, personalizedLoading])
   // ================= BROWSER BACK BUTTON =================
 
   useEffect(() => {
     if (!window.history.state?.microartsView) {
-      const artworkSlug = getArtworkSlugFromUrl()
-      const giftSlug = getGiftSlugFromUrl()
-
-      const initialView = artworkSlug
-        ? "artwork"
-        : giftSlug
-          ? "product"
-          : "home"
-
       window.history.replaceState(
         {
-          microartsView: initialView,
-          ...(artworkSlug ? { slug: artworkSlug } : {}),
-          ...(giftSlug ? { slug: giftSlug } : {}),
+          microartsView: "home",
         },
         "",
         window.location.href
@@ -360,62 +265,6 @@ function App() {
     const handleBrowserBack = (event) => {
       const view =
         event.state?.microartsView || "home"
-        const artworkSlug = getArtworkSlugFromUrl()
-
-        if (artworkSlug) {
-          const artwork = artworks.find(
-            (item) => item.slug === artworkSlug
-          )
-
-          if (artwork) {
-            setSelectedArtwork(artwork)
-            setShowProduct(false)
-            setSelectedPersonalizedProduct(null)
-            setShowPersonalized(false)
-            setShowCart(false)
-            setShowLogin(false)
-            setShowArtistDashboard(false)
-            setShowCheckout(false)
-            setShowRequestForm(false)
-
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            })
-
-            return
-          }
-        }
-
-        // ================= PERSONALIZED GIFT URL NAVIGATION =================
-
-        const giftSlug = getGiftSlugFromUrl()
-
-        if (giftSlug) {
-          const product = personalizedProducts.find(
-            (item) => item.slug === giftSlug
-          )
-
-          if (product) {
-            setSelectedPersonalizedProduct(product)
-            setShowProduct(true)
-            setSelectedArtwork(null)
-            setShowPersonalized(false)
-
-            setShowCart(false)
-            setShowLogin(false)
-            setShowArtistDashboard(false)
-            setShowCheckout(false)
-            setShowRequestForm(false)
-
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            })
-
-            return
-          }
-        }
 
       // Close detail pages
       setSelectedArtwork(null)
@@ -475,7 +324,7 @@ function App() {
         handleBrowserBack
       )
     }
-  }, [artworks, personalizedProducts])
+  }, [])
   const [showAddProductForm, setShowAddProductForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
 
@@ -655,22 +504,11 @@ function App() {
 
   const letterCount =
     customText.replace(/\s/g, "").length
-
+  
 
   // ================= NAVIGATION =================
 
   const goHome = () => {
-    // ================= RESET HOME URL =================
-
-    if (window.location.pathname !== "/") {
-      window.history.pushState(
-        {
-          microartsView: "home",
-        },
-        "",
-        "/"
-      )
-    }
     setShowCart(false)
     setShowProduct(false)
     setShowPersonalized(false)
@@ -699,15 +537,15 @@ function App() {
 
   const openPersonalized = async () => {
     if (
-      window.history.state?.microartsView !== "personalized" ||
-      window.location.pathname !== "/"
+      window.history.state?.microartsView !==
+      "personalized"
     ) {
       window.history.pushState(
         {
           microartsView: "personalized",
         },
         "",
-        "/"
+        window.location.href
       )
     }
     setShowCart(false)
@@ -722,7 +560,7 @@ function App() {
 
     setSelectedArtwork(null)
 
-
+    
 
     window.scrollTo({
       top: 0,
@@ -858,7 +696,7 @@ function App() {
       )
     }
   }
-
+  
   // Artist-only deletion; uses the existing MicroArts confirmation modal.
   const deleteCustomRequest = async (requestId) => {
     const confirmed = await showConfirm({
@@ -1069,6 +907,35 @@ function App() {
       )
     }
   }
+  // Artist-only stock availability, independent of Active / Inactive.
+  const toggleProductStock = async (product) => {
+    try {
+      const formData = new FormData()
+      formData.append("inStock", String(product.inStock !== false ? false : true))
+      const response = await fetch(
+        `${API_URL}/api/personalized-products/${product._id}`,
+        {
+          method: "PATCH",
+          headers: { Authorization: `Bearer ${authToken}` },
+          body: formData,
+        }
+      )
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.message || "Failed to update stock")
+      setPersonalizedProducts((current) =>
+        current.map((item) => item._id === product._id ? data.product : item)
+      )
+      setSelectedPersonalizedProduct((current) =>
+        current?._id === product._id ? data.product : current
+      )
+      showNotification(data.product.inStock === false
+        ? "Product marked Out of Stock."
+        : "Product marked In Stock.")
+    } catch (error) {
+      showNotification(error.message || "Unable to update stock status")
+    }
+  }
+
   const toggleProductActive = async (product) => {
     try {
       const formData = new FormData()
@@ -1495,19 +1362,11 @@ function App() {
         )
       }
     )
-
+    
 
   // ================= ARTWORK DETAIL =================
 
   const openArtwork = (artwork) => {
-    if (!artwork.slug) {
-      console.error(
-        "Artwork does not have a URL slug:",
-        artwork.title
-      )
-      return
-    }
-
     window.history.replaceState(
       {
         ...window.history.state,
@@ -1521,10 +1380,9 @@ function App() {
     window.history.pushState(
       {
         microartsView: "artwork",
-        slug: artwork.slug,
       },
       "",
-      `/artworks/${encodeURIComponent(artwork.slug)}`
+      window.location.href
     )
 
     setSelectedArtwork(artwork)
@@ -1541,22 +1399,16 @@ function App() {
   }
 
   const backToGallery = () => {
-    // Return to the homepage URL
-    if (window.location.pathname !== "/") {
-      window.history.pushState(
-        {
-          microartsView: "home",
-          returnTo: "gallery",
-        },
-        "",
-        "/"
-      )
+    if (
+      window.history.state?.microartsView ===
+      "artwork"
+    ) {
+      window.history.back()
+      return
     }
 
-    // Close the artwork detail page
     setSelectedArtwork(null)
 
-    // Scroll to the gallery
     setTimeout(() => {
       document
         .getElementById("gallery")
@@ -1695,6 +1547,11 @@ function App() {
       return
     }
 
+    if (selectedPersonalizedProduct.inStock === false) {
+      showNotification("This gift is currently out of stock.", "warning")
+      return
+    }
+
     if (letterCount === 0) {
       showNotification(
         "Please enter a name or message before adding to requests."
@@ -1818,6 +1675,24 @@ function App() {
 
     if (cart.length === 0) {
       showNotification("Your requests cart is empty.")
+      return
+    }
+
+    // Recheck availability before checkout; the backend enforces it too.
+    try {
+      const response = await fetch(`${API_URL}/api/personalized-products`)
+      if (!response.ok) throw new Error("Unable to verify gift availability.")
+      const products = await response.json()
+      const unavailable = cart.find((item) => {
+        const product = products.find((p) => p._id === item.productId)
+        return !product || product.inStock === false
+      })
+      if (unavailable) {
+        showNotification(`"${unavailable.product}" is no longer available. Please remove it from your requests.`, "warning")
+        return
+      }
+    } catch (error) {
+      showNotification(error.message || "Unable to verify gift availability.", "error")
       return
     }
 
@@ -3283,11 +3158,11 @@ function App() {
                 </button>
 
 
-                <button
-                  className="dashboard-option-card"
-                  onClick={() =>
-                    setArtistDashboardSection("products")
-                  }
+                <button 
+                  className="dashboard-option-card" 
+                  onClick={() => 
+                    setArtistDashboardSection("products") 
+                  } 
                 >
 
                   <span className="dashboard-option-icon">
@@ -3488,7 +3363,7 @@ function App() {
 
                         </select>
 
-
+                      
                       </div>
 
                       <div className="request-actions">
@@ -3932,6 +3807,22 @@ function App() {
 
                       </div>
 
+                      <div className="form-group">
+                        <label htmlFor="new-product-stock">Material Availability</label>
+                        <select id="new-product-stock" name="inStock" defaultValue="true">
+                          <option value="true">In Stock</option>
+                          <option value="false">Out of Stock</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="edit-product-stock">Material Availability</label>
+                        <select id="edit-product-stock" name="inStock" defaultValue={editingProduct.inStock === false ? "false" : "true"}>
+                          <option value="true">In Stock</option>
+                          <option value="false">Out of Stock</option>
+                        </select>
+                      </div>
+
                       <div className="product-form-actions">
 
                         <button
@@ -4190,6 +4081,10 @@ function App() {
                           : "Inactive"}
                       </p>
                       <p>
+                        <strong>Material Availability:</strong>{" "}
+                        {product.inStock === false ? "Out of Stock" : "In Stock"}
+                      </p>
+                      <p>
                         <strong>
                           Priority:
                         </strong>{" "}
@@ -4210,6 +4105,10 @@ function App() {
                           onClick={() => toggleProductActive(product)}
                         >
                           {product.active ? "Deactivate" : "Activate"}
+                        </button>
+
+                        <button type="button" onClick={() => toggleProductStock(product)}>
+                          {product.inStock === false ? "Mark In Stock" : "Mark Out of Stock"}
                         </button>
 
                         <button
@@ -4724,28 +4623,19 @@ function App() {
                 </p>
 
               </div>
-              <div className="custom-art-actions">
 
-                <button
-                  onClick={() => {
-                    setRequestFormType("custom-art")
-                    setCustomRequestArtwork(selectedArtwork)
-                    setSelectedArtwork(null)
+              <button
+                onClick={() => {
+                  setRequestFormType("custom-art")
+                  setCustomRequestArtwork(selectedArtwork)
+                  setSelectedArtwork(null)
 
-                    setRequestSubmitted(false)
-                    setShowRequestForm(true)
-                  }}
-                >
-                  Request Customized Art
-                </button>
-
-                <button
-                  onClick={openPersonalized}
-                >
-                  Explore Personalized Gifts
-                </button>
-
-              </div>
+                  setRequestSubmitted(false)
+                  setShowRequestForm(true)
+                }}
+              >
+                Request Customized Art
+              </button>
 
             </div>
 
@@ -4761,7 +4651,9 @@ function App() {
 
           <button
             className="back-button"
-            onClick={openPersonalized}
+            onClick={() => {
+              window.history.back()
+            }}
           >
             ← Back to Personalized Gifts
           </button>
@@ -4808,6 +4700,12 @@ function App() {
 
               </div>
 
+              {selectedPersonalizedProduct.inStock === false && (
+                <p className="stock-unavailable" role="status" style={{ color: "#a12424", fontWeight: 700 }}>
+                  Out of Stock — Materials are currently unavailable. You can still view this artwork, but requests are temporarily closed.
+                </p>
+              )}
+
               <div className="name-input-section">
 
                 <label htmlFor="customText">
@@ -4823,6 +4721,7 @@ function App() {
                   }
                   placeholder="Example: Vivek Podagatla"
                   maxLength="50"
+                  disabled={selectedPersonalizedProduct.inStock === false}
                 />
 
                 <p className="letter-count">
@@ -4861,8 +4760,10 @@ function App() {
               <button
                 className="add-to-cart-button"
                 onClick={addToCart}
+                disabled={selectedPersonalizedProduct.inStock === false}
+                style={selectedPersonalizedProduct.inStock === false ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
               >
-                🎁 Add to Requests
+                {selectedPersonalizedProduct.inStock === false ? "Out of Stock" : "🎁 Add to Requests"}
               </button>
 
             </div>
@@ -4900,7 +4801,7 @@ function App() {
 
           <div className="personalized-products">
 
-
+            
             {personalizedLoading ? (
               <div className="gallery-loading" role="status" style={{ gridColumn: "1 / -1" }}>
                 <h3>Loading Personalized MicroArts...</h3>
@@ -4911,7 +4812,7 @@ function App() {
                 <p>Your personalized artworks will appear automatically.</p>
               </div>
             ) : personalizedError ? (
-
+              
               <div className="gallery-loading" role="alert" style={{ gridColumn: "1 / -1" }}>
                 <h3>Unable to Load Personalized MicroArts</h3>
 
@@ -4949,36 +4850,27 @@ function App() {
                   className="personalized-card"
                   key={product._id}
                   onClick={() => {
-                    if (!product.slug) {
-                      console.error(
-                        "Personalized product has no slug:",
-                        product.title
-                      )
-                      return
-                    }
-
                     window.history.pushState(
                       {
                         microartsView: "product",
-                        slug: product.slug,
                       },
                       "",
-                      `/gifts/${encodeURIComponent(product.slug)}`
+                      window.location.href
                     )
 
                     setCustomText("")
                     setSelectedPersonalizedProduct(product)
                     setShowProduct(true)
-
-                    window.scrollTo({
-                      top: 0,
-                      behavior: "smooth",
-                    })
                   }}
                 >
 
-
-                  <div className="artwork-image-container">
+                  
+                  <div className="artwork-image-container" style={{ position: "relative" }}>
+                    {product.inStock === false && (
+                      <span className="stock-badge" style={{ position: "absolute", zIndex: 2, top: 10, left: 10, padding: "6px 10px", borderRadius: 6, background: "#7d2525", color: "white", fontWeight: 700 }}>
+                        Out of Stock
+                      </span>
+                    )}
                     <img
                       src={getImageUrl(product.image)}
                       alt={product.title}
@@ -5073,7 +4965,7 @@ function App() {
                   draggable="false"
                 />
 
-
+                
 
               </div>
 
@@ -5081,7 +4973,7 @@ function App() {
 
           </section>
 
-
+          
           {/* ================= GALLERY ================= */}
 
           <section
@@ -5114,7 +5006,7 @@ function App() {
 
               ) : artworksError ? (
 
-
+                
                 <div className="gallery-loading" role="alert" style={{ gridColumn: "1 / -1" }}>
                   <h3>Unable to Load Artworks</h3>
 
@@ -5224,7 +5116,7 @@ function App() {
           </section>
 
 
-
+          
 
           {/* ABOUT */}
 
@@ -5314,39 +5206,6 @@ function App() {
                   <path d="M13.5 22v-9h3l.5-3.5h-3.5V7.25c0-1 .28-1.75 1.8-1.75H17V2.38C16.7 2.34 15.67 2.25 14.45 2.25c-2.55 0-4.3 1.56-4.3 4.42V9.5H7.25V13h2.9v9h3.35z" />
                 </svg>
               </a>
-
-              {/* YouTube */}
-              <a
-                href="https://youtube.com/@microartsvivek1657"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="YouTube"
-                title="YouTube"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z" />
-                </svg>
-              </a>
-
-              {/* TikTok */}
-              <a
-                href="https://www.tiktok.com/@vivekmicroartist"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="TikTok"
-                title="TikTok"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path d="M16.6 1h-3.4v14.3a3.3 3.3 0 1 1-2.9-3.3V8.5a6.8 6.8 0 1 0 6.3 6.8V8.1a8.7 8.7 0 0 0 5.1 1.6V6.3A5.2 5.2 0 0 1 16.6 1Z" />
-                </svg>
-              </a>
-
 
             </div>
 
@@ -5677,7 +5536,7 @@ function App() {
 
     </div>
   )
-
+  
 }
 
 export default App

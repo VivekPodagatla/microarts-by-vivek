@@ -283,6 +283,11 @@ router.post(
             active === undefined
               ? true
               : active === "true",
+
+          inStock:
+            req.body.inStock === undefined
+              ? true
+              : req.body.inStock === "true",
         })
 
 
@@ -528,6 +533,21 @@ router.patch(
         product.active =
           req.body.active ===
           "true"
+      }
+
+      // ================= STOCK AVAILABILITY =================
+
+      if (req.body.inStock !== undefined) {
+        if (
+          req.body.inStock !== "true" &&
+          req.body.inStock !== "false"
+        ) {
+          return res.status(400).json({
+            message: "Invalid stock availability.",
+          })
+        }
+
+        product.inStock = req.body.inStock === "true"
       }
 
 
