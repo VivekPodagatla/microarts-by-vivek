@@ -113,6 +113,27 @@ function App() {
 
   const [selectedArtwork, setSelectedArtwork] =
     useState(null)
+    // ================= DIRECT ARTWORK URL SUPPORT =================
+
+  useEffect(() => {
+    const match = window.location.pathname.match(
+      /^\/artworks\/([^/]+)\/?$/
+    )
+
+    if (!match || artworksLoading) return
+
+    const slug = decodeURIComponent(match[1])
+
+    const artwork = artworks.find(
+      (item) => item.slug === slug
+    )
+
+    if (!artwork) return
+
+    setSelectedArtwork(artwork)
+    setShowPersonalized(false)
+    setShowProduct(false)
+  }, [artworks, artworksLoading])
 
   const [customRequestArtwork, setCustomRequestArtwork] =
     useState(null)
@@ -249,13 +270,34 @@ function App() {
   const [personalizedError, setPersonalizedError] = useState(false)
 
   const [selectedPersonalizedProduct,setSelectedPersonalizedProduct,] = useState(null)
+
+  // Open a gift when its SEO URL is loaded directly or refreshed.
+  useEffect(() => {
+    const match = window.location.pathname.match(/^\/gifts\/([^/]+)\/?$/)
+    if (!match || personalizedLoading) return
+    const product = personalizedProducts.find(
+      (item) => item.slug === decodeURIComponent(match[1])
+    )
+    if (!product) return
+    setSelectedPersonalizedProduct(product)
+    setShowProduct(true)
+    setSelectedArtwork(null)
+    setShowPersonalized(false)
+  }, [personalizedProducts, personalizedLoading])
+
   // ================= BROWSER BACK BUTTON =================
 
   useEffect(() => {
     if (!window.history.state?.microartsView) {
+      const isDirectDetail = /^\/(artworks|gifts)\/[^/]+\/?$/.test(
+        window.location.pathname
+      )
       window.history.replaceState(
         {
-          microartsView: "home",
+          microartsView: isDirectDetail
+            ? (window.location.pathname.startsWith("/artworks/") ? "artwork" : "product")
+            : "home",
+          directEntry: isDirectDetail,
         },
         "",
         window.location.href
@@ -263,8 +305,9 @@ function App() {
     }
 
     const handleBrowserBack = (event) => {
-      const view =
-        event.state?.microartsView || "home"
+      const view = event.state?.microartsView || "home"
+      const artworkMatch = window.location.pathname.match(/^\/artworks\/([^/]+)\/?$/)
+      const giftMatch = window.location.pathname.match(/^\/gifts\/([^/]+)\/?$/)
 
       // Close detail pages
       setSelectedArtwork(null)
@@ -279,6 +322,32 @@ function App() {
       setShowRequestForm(false)
 
       setCustomText("")
+
+      // Restore detail views when navigating Forward or Back to their URLs.
+      if (artworkMatch) {
+        const artwork = artworks.find((item) =>
+          item.slug === decodeURIComponent(artworkMatch[1])
+        )
+        if (artwork) {
+          setSelectedArtwork(artwork)
+          setShowPersonalized(false)
+          window.scrollTo({ top: 0, behavior: "smooth" })
+          return
+        }
+      }
+
+      if (giftMatch) {
+        const product = personalizedProducts.find((item) =>
+          item.slug === decodeURIComponent(giftMatch[1])
+        )
+        if (product) {
+          setSelectedPersonalizedProduct(product)
+          setShowProduct(true)
+          setShowPersonalized(false)
+          window.scrollTo({ top: 0, behavior: "smooth" })
+          return
+        }
+      }
 
       if (view === "personalized") {
         setShowPersonalized(true)
@@ -324,7 +393,7 @@ function App() {
         handleBrowserBack
       )
     }
-  }, [])
+  }, [artworks, personalizedProducts])
   const [showAddProductForm, setShowAddProductForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
 
@@ -509,6 +578,9 @@ function App() {
   // ================= NAVIGATION =================
 
   const goHome = () => {
+    if (/^\/(artworks|gifts)\/[^/]+\/?$/.test(window.location.pathname)) {
+      window.history.replaceState({ microartsView: "home" }, "", "/")
+    }
     setShowCart(false)
     setShowProduct(false)
     setShowPersonalized(false)
@@ -536,6 +608,9 @@ function App() {
   }
 
   const openPersonalized = async () => {
+    if (/^\/(artworks|gifts)\/[^/]+\/?$/.test(window.location.pathname)) {
+      window.history.replaceState({ microartsView: "home" }, "", "/")
+    }
     if (
       window.history.state?.microartsView !==
       "personalized"
@@ -568,6 +643,9 @@ function App() {
     })
   }
   const openCart = () => {
+    if (/^\/(artworks|gifts)\/[^/]+\/?$/.test(window.location.pathname)) {
+      window.history.replaceState({ microartsView: "home" }, "", "/")
+    }
     setShowCart(true)
     setShowProduct(false)
     setShowPersonalized(false)
@@ -588,6 +666,9 @@ function App() {
 
 
   const openLogin = () => {
+    if (/^\/(artworks|gifts)\/[^/]+\/?$/.test(window.location.pathname)) {
+      window.history.replaceState({ microartsView: "home" }, "", "/")
+    }
     setShowLogin(true)
     setShowCart(false)
     setShowProduct(false)
@@ -608,6 +689,9 @@ function App() {
 
 
   const openArtistDashboard = async (tokenOverride = authToken) => {
+    if (/^\/(artworks|gifts)\/[^/]+\/?$/.test(window.location.pathname)) {
+      window.history.replaceState({ microartsView: "home" }, "", "/")
+    }
     const dashboardToken = tokenOverride
 
     setShowArtistDashboard(true)
@@ -1382,7 +1466,7 @@ function App() {
         microartsView: "artwork",
       },
       "",
-      window.location.href
+      `/artworks/${artwork.slug}`
     )
 
     setSelectedArtwork(artwork)
@@ -1399,6 +1483,13 @@ function App() {
   }
 
   const backToGallery = () => {
+    if (window.history.state?.directEntry) {
+      goHome()
+      window.setTimeout(() => {
+        document.getElementById("gallery")?.scrollIntoView({ behavior: "smooth" })
+      }, 50)
+      return
+    }
     if (
       window.history.state?.microartsView ===
       "artwork"
@@ -1593,6 +1684,9 @@ function App() {
       newItem,
     ])
 
+    if (/^\/gifts\/[^/]+\/?$/.test(window.location.pathname)) {
+      window.history.replaceState({ microartsView: "home" }, "", "/")
+    }
     setCustomText("")
     setSelectedPersonalizedProduct(null)
 
@@ -4868,7 +4962,14 @@ function App() {
           <button
             className="back-button"
             onClick={() => {
-              window.history.back()
+              if (window.history.state?.directEntry) {
+                window.history.replaceState({ microartsView: "personalized" }, "", "/")
+                setShowProduct(false)
+                setSelectedPersonalizedProduct(null)
+                setShowPersonalized(true)
+              } else {
+                window.history.back()
+              }
             }}
           >
             ← Back to Personalized Gifts
@@ -5070,12 +5171,15 @@ function App() {
                   className="personalized-card"
                   key={product._id}
                   onClick={() => {
-                    window.history.pushState(
-                      {
-                        microartsView: "product",
-                      },
+                    window.history.replaceState(
+                      { ...window.history.state, microartsView: "personalized" },
                       "",
                       window.location.href
+                    )
+                    window.history.pushState(
+                      { microartsView: "product" },
+                      "",
+                      `/gifts/${product.slug}`
                     )
 
                     setCustomText("")
