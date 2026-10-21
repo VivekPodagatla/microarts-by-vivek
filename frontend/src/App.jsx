@@ -42,7 +42,7 @@ function App() {
   const [artworksLoading, setArtworksLoading] = useState(true)
   const [artworksError, setArtworksError] = useState(false)
 
-  
+
   const loadArtworks = async () => {
     setArtworksLoading(true)
     setArtworksError(false)
@@ -75,8 +75,8 @@ function App() {
 
 
 
-  
-  
+
+
   const loadPersonalizedProducts = async () => {
     setPersonalizedLoading(true)
     setPersonalizedError(false)
@@ -135,7 +135,7 @@ function App() {
   const [customText, setCustomText] =
     useState("")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  
+
 
   // ================= AUTH PROFILE =================
 
@@ -244,7 +244,7 @@ function App() {
   const [orders, setOrders] = useState([])
 
   const [personalizedProducts, setPersonalizedProducts] = useState([])
-  
+
   const [personalizedLoading, setPersonalizedLoading] = useState(true)
   const [personalizedError, setPersonalizedError] = useState(false)
 
@@ -504,7 +504,7 @@ function App() {
 
   const letterCount =
     customText.replace(/\s/g, "").length
-  
+
 
   // ================= NAVIGATION =================
 
@@ -560,7 +560,7 @@ function App() {
 
     setSelectedArtwork(null)
 
-    
+
 
     window.scrollTo({
       top: 0,
@@ -696,7 +696,7 @@ function App() {
       )
     }
   }
-  
+
   // Artist-only deletion; uses the existing MicroArts confirmation modal.
   const deleteCustomRequest = async (requestId) => {
     const confirmed = await showConfirm({
@@ -1362,7 +1362,7 @@ function App() {
         )
       }
     )
-    
+
 
   // ================= ARTWORK DETAIL =================
 
@@ -3158,11 +3158,11 @@ function App() {
                 </button>
 
 
-                <button 
-                  className="dashboard-option-card" 
-                  onClick={() => 
-                    setArtistDashboardSection("products") 
-                  } 
+                <button
+                  className="dashboard-option-card"
+                  onClick={() =>
+                    setArtistDashboardSection("products")
+                  }
                 >
 
                   <span className="dashboard-option-icon">
@@ -3363,7 +3363,7 @@ function App() {
 
                         </select>
 
-                      
+
                       </div>
 
                       <div className="request-actions">
@@ -3733,6 +3733,51 @@ function App() {
                         />
                       </div>
 
+                      <div className="form-group">
+                        <label>SEO Page Title (Optional)</label>
+
+                        <input
+                          type="text"
+                          name="seoTitle"
+                          maxLength={120}
+                          placeholder="Example: Personalized Pencil Carving Gift"
+                        />
+
+                        <small>
+                          A search-friendly title for Google.
+                        </small>
+                      </div>
+
+                      <div className="form-group">
+                        <label>SEO Meta Description (Optional)</label>
+
+                        <textarea
+                          name="seoDescription"
+                          rows="3"
+                          maxLength={160}
+                          placeholder="Describe this personalized gift for Google search results"
+                        />
+
+                        <small>
+                          Recommended: approximately 140–160 characters.
+                        </small>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Google Image Alt Text (Optional)</label>
+
+                        <textarea
+                          name="imageAlt"
+                          rows="3"
+                          maxLength={200}
+                          placeholder="Describe what is visible in the product image"
+                        />
+
+                        <small>
+                          Describe the actual artwork for Google Images
+                          and accessibility. Avoid keyword stuffing.
+                        </small>
+                      </div>
 
                       <div className="form-group">
                         <label>Product Image</label>
@@ -3815,14 +3860,6 @@ function App() {
                         </select>
                       </div>
 
-                      <div className="form-group">
-                        <label htmlFor="edit-product-stock">Material Availability</label>
-                        <select id="edit-product-stock" name="inStock" defaultValue={editingProduct.inStock === false ? "false" : "true"}>
-                          <option value="true">In Stock</option>
-                          <option value="false">Out of Stock</option>
-                        </select>
-                      </div>
-
                       <div className="product-form-actions">
 
                         <button
@@ -3883,6 +3920,55 @@ function App() {
                           defaultValue={editingProduct.description}
                           required
                         />
+                      </div>
+
+                      <div className="form-group">
+                        <label>SEO Page Title (Optional)</label>
+
+                        <input
+                          type="text"
+                          name="seoTitle"
+                          maxLength={120}
+                          defaultValue={editingProduct.seoTitle || ""}
+                          placeholder="Example: Personalized Pencil Carving Gift"
+                        />
+
+                        <small>
+                          A search-friendly title for Google.
+                        </small>
+                      </div>
+
+                      <div className="form-group">
+                        <label>SEO Meta Description (Optional)</label>
+
+                        <textarea
+                          name="seoDescription"
+                          rows="3"
+                          maxLength={160}
+                          defaultValue={editingProduct.seoDescription || ""}
+                          placeholder="Describe this personalized gift for Google search results"
+                        />
+
+                        <small>
+                          Recommended: approximately 140–160 characters.
+                        </small>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Google Image Alt Text (Optional)</label>
+
+                        <textarea
+                          name="imageAlt"
+                          rows="3"
+                          maxLength={200}
+                          defaultValue={editingProduct.imageAlt || ""}
+                          placeholder="Describe what is visible in the product image"
+                        />
+
+                        <small>
+                          Describe the actual artwork for Google Images
+                          and accessibility. Avoid keyword stuffing.
+                        </small>
                       </div>
 
                       <div className="form-group">
@@ -3972,6 +4058,25 @@ function App() {
 
                       </div>
 
+                      <div className="form-group">
+                        <label htmlFor="edit-product-stock">
+                          Material Availability
+                        </label>
+
+                        <select
+                          id="edit-product-stock"
+                          name="inStock"
+                          defaultValue={
+                            editingProduct.inStock === false
+                              ? "false"
+                              : "true"
+                          }
+                        >
+                          <option value="true">In Stock</option>
+                          <option value="false">Out of Stock</option>
+                        </select>
+                      </div>
+
                       <div className="product-form-actions">
                         <button
                           type="button"
@@ -4040,10 +4145,12 @@ function App() {
                       key={product._id}
                     >
 
+
                       <img
                         src={getImageUrl(product.image)}
-                        alt={product.title}
+                        alt={product.imageAlt?.trim() || product.title}
                       />
+
 
                       <h2>
                         {product.title}
@@ -4163,6 +4270,53 @@ function App() {
                           required
                         />
                       </div>
+
+                      {/* ================= ARTWORK SEO ================= */}
+
+                      <div className="form-group">
+                        <label>SEO Page Title (Optional)</label>
+                        <input
+                          type="text"
+                          name="seoTitle"
+                          maxLength={120}
+                          placeholder="Example: Couple Pencil Carving | Miniature Art"
+                        />
+                        <small>
+                          Appears in Google search results. Aim for a clear,
+                          descriptive title around 50–60 characters.
+                        </small>
+                      </div>
+
+                      <div className="form-group">
+                        <label>SEO Meta Description (Optional)</label>
+                        <textarea
+                          name="seoDescription"
+                          rows="3"
+                          maxLength={160}
+                          placeholder="Describe the artwork using natural keywords such as pencil carving, miniature art, or handmade gifts."
+                        />
+                        <small>
+                          Write a unique description of approximately 140–160
+                          characters. Leave blank to use the artwork description.
+                        </small>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Image Alt Text (Optional)</label>
+                        <textarea
+                          name="imageAlt"
+                          rows="3"
+                          maxLength={200}
+                          placeholder="Example: Miniature couple sharing an umbrella, hand-carved from a single pencil."
+                        />
+                        <small>
+                          Describe what is visible in the artwork image.
+                          This helps Google understand the image and
+                          improves accessibility. Keep it natural and accurate.
+                        </small>
+                      </div>
+
+
 
                       <div className="form-group">
                         <label>Size</label>
@@ -4285,6 +4439,57 @@ function App() {
                           required
                         />
                       </div>
+
+                      {/* ================= ARTWORK SEO ================= */}
+
+                      <div className="form-group">
+                        <label>SEO Page Title (Optional)</label>
+                        <input
+                          type="text"
+                          name="seoTitle"
+                          maxLength={120}
+                          defaultValue={editingArtwork.seoTitle || ""}
+                          placeholder="Example: Couple Pencil Carving | Miniature Art"
+                        />
+                        <small>
+                          Write a unique, descriptive SEO title.
+                          Aim for approximately 50–60 characters.
+                        </small>
+                      </div>
+
+                      <div className="form-group">
+                        <label>SEO Meta Description (Optional)</label>
+                        <textarea
+                          name="seoDescription"
+                          rows="3"
+                          maxLength={160}
+                          defaultValue={editingArtwork.seoDescription || ""}
+                          placeholder="Describe this artwork using natural, relevant search terms."
+                        />
+                        <small>
+                          Aim for approximately 140–160 characters.
+                          Leave blank to use the artwork description.
+                        </small>
+                      </div>
+
+
+                      <div className="form-group">
+                        <label>Image Alt Text (Optional)</label>
+                        <textarea
+                          name="imageAlt"
+                          rows="3"
+                          maxLength={200}
+                          defaultValue={editingArtwork.imageAlt || ""}
+                          placeholder="Example: Miniature couple sharing an umbrella, hand-carved from a single pencil."
+                        />
+                        <small>
+                          Describe what is visible in the artwork image.
+                          This helps Google understand the image and
+                          improves accessibility.
+                        </small>
+                      </div>
+
+
 
                       <div className="form-group">
                         <label>Size</label>
@@ -4436,10 +4641,12 @@ function App() {
                       key={artwork._id}
                     >
 
+
                       <img
                         src={getArtworkImageUrl(artwork.image)}
-                        alt={artwork.title}
+                        alt={artwork.imageAlt?.trim() || artwork.title}
                       />
+
 
                       <h2>{artwork.title}</h2>
 
@@ -4531,7 +4738,7 @@ function App() {
 
               <img
                 src={getArtworkImageUrl(selectedArtwork.image)}
-                alt={selectedArtwork.title}
+                alt={selectedArtwork.imageAlt?.trim() || selectedArtwork.title}
               />
 
             </div>
@@ -4673,10 +4880,14 @@ function App() {
 
               <img
                 src={getImageUrl(selectedPersonalizedProduct.image)}
-                alt={selectedPersonalizedProduct.title}
+                alt={
+                  selectedPersonalizedProduct.imageAlt?.trim() ||
+                  selectedPersonalizedProduct.title
+                }
               />
 
             </div>
+
 
             <div className="personalized-product-info">
 
@@ -4810,7 +5021,7 @@ function App() {
 
           <div className="personalized-products">
 
-            
+
             {personalizedLoading ? (
               <div className="gallery-loading" role="status" style={{ gridColumn: "1 / -1" }}>
                 <h3>Loading Personalized MicroArts...</h3>
@@ -4821,7 +5032,7 @@ function App() {
                 <p>Your personalized artworks will appear automatically.</p>
               </div>
             ) : personalizedError ? (
-              
+
               <div className="gallery-loading" role="alert" style={{ gridColumn: "1 / -1" }}>
                 <h3>Unable to Load Personalized MicroArts</h3>
 
@@ -4873,21 +5084,23 @@ function App() {
                   }}
                 >
 
-                  
+
                   <div className="artwork-image-container" style={{ position: "relative" }}>
                     {product.inStock === false && (
                       <span className="stock-badge" style={{ position: "absolute", zIndex: 2, top: 10, left: 10, padding: "6px 10px", borderRadius: 6, background: "#7d2525", color: "white", fontWeight: 700 }}>
                         Out of Stock
                       </span>
                     )}
+
                     <img
                       src={getImageUrl(product.image)}
-                      alt={product.title}
+                      alt={product.imageAlt?.trim() || product.title}
                       loading="lazy"
                       onLoad={(event) => {
                         event.currentTarget.classList.add("image-loaded")
                       }}
                     />
+
                   </div>
 
 
@@ -4974,7 +5187,7 @@ function App() {
                   draggable="false"
                 />
 
-                
+
 
               </div>
 
@@ -4982,7 +5195,7 @@ function App() {
 
           </section>
 
-          
+
           {/* ================= GALLERY ================= */}
 
           <section
@@ -5015,7 +5228,7 @@ function App() {
 
               ) : artworksError ? (
 
-                
+
                 <div className="gallery-loading" role="alert" style={{ gridColumn: "1 / -1" }}>
                   <h3>Unable to Load Artworks</h3>
 
@@ -5060,7 +5273,7 @@ function App() {
                     <div className="artwork-image-container">
                       <img
                         src={getArtworkImageUrl(artwork.image)}
-                        alt={artwork.title}
+                        alt={artwork.imageAlt?.trim() || artwork.title}
                         loading="lazy"
                         onLoad={(event) => {
                           event.currentTarget.classList.add("image-loaded")
@@ -5125,7 +5338,7 @@ function App() {
           </section>
 
 
-          
+
 
           {/* ABOUT */}
 
@@ -5576,7 +5789,7 @@ function App() {
 
     </div>
   )
-  
+
 }
 
 export default App

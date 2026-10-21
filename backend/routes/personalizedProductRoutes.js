@@ -164,6 +164,9 @@ router.post(
         title,
         description,
         basePrice,
+        seoTitle,
+        seoDescription,
+        imageAlt,
         pricePerLetter,
         minimumPrice,
         displayOrder,
@@ -253,11 +256,22 @@ router.post(
           title:
             title.trim(),
 
+
           description:
             description.trim(),
 
+          seoTitle:
+            String(seoTitle || "").trim(),
+
+          seoDescription:
+            String(seoDescription || "").trim(),
+
+          imageAlt:
+            String(imageAlt || "").trim(),
+
           image:
             cloudinaryResult.secure_url,
+
 
           imagePublicId:
             cloudinaryResult.public_id,
@@ -418,6 +432,24 @@ router.patch(
           cleanDescription
       }
 
+      // ================= SEO METADATA =================
+
+      if (req.body.seoTitle !== undefined) {
+        product.seoTitle =
+          String(req.body.seoTitle).trim()
+      }
+
+      if (req.body.seoDescription !== undefined) {
+        product.seoDescription =
+          String(req.body.seoDescription).trim()
+      }
+
+      // ================= IMAGE ALT TEXT =================
+
+      if (req.body.imageAlt !== undefined) {
+        product.imageAlt =
+          String(req.body.imageAlt).trim()
+      }
 
       // ================= BASE PRICE =================
 

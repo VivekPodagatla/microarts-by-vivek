@@ -26,6 +26,18 @@ const artworkSchema =
         required: true,
         trim: true,
       },
+      // Optional SEO metadata for individual artwork pages
+      seoTitle: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
+      seoDescription: {
+        type: String,
+        trim: true,
+        default: "",
+      },
 
 
       image: {
@@ -33,6 +45,13 @@ const artworkSchema =
         required: true,
         trim: true,
       },
+
+      imageAlt: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+
 
 
       // Cloudinary public ID

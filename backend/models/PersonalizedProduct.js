@@ -23,11 +23,32 @@ const personalizedProductSchema = new mongoose.Schema(
       trim: true,
     },
 
+    // Optional SEO metadata for personalized gifts
+    seoTitle: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+    seoDescription: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
+
     image: {
       type: String,
       required: true,
       trim: true,
     },
+
+    imageAlt: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
 
     imagePublicId: {
       type: String,

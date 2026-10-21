@@ -233,6 +233,9 @@ router.post(
         title,
         description,
         size,
+        seoTitle,
+        seoDescription,
+        imageAlt,
         material,
         category,
         timeTaken,
@@ -311,8 +314,20 @@ router.post(
           description:
             cleanDescription,
 
+          seoTitle:
+            String(seoTitle || "").trim(),
+
+
+          seoDescription:
+            String(seoDescription || "").trim(),
+
+          imageAlt:
+            String(imageAlt || "").trim(),
+
           image:
             cloudinaryResult.secure_url,
+
+
 
           imagePublicId:
             cloudinaryResult.public_id,
@@ -442,6 +457,9 @@ router.patch(
         title,
         description,
         size,
+        seoTitle,
+        seoDescription,
+        imageAlt,
         material,
         category,
         timeTaken,
@@ -497,6 +515,21 @@ router.patch(
 
         artwork.description =
           cleanDescription
+      }
+
+
+      // ================= SEO METADATA =================
+
+      if (seoTitle !== undefined) {
+        artwork.seoTitle = String(seoTitle).trim()
+      }
+
+      if (seoDescription !== undefined) {
+        artwork.seoDescription = String(seoDescription).trim()
+      }
+
+      if (imageAlt !== undefined) {
+        artwork.imageAlt = String(imageAlt).trim()
       }
 
 

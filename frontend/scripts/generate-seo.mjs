@@ -81,13 +81,20 @@ const generatePage = (template, item, type) => {
     isGift ? "gifts" : "artworks"
   }/${slug}`
 
-  const title = isGift
+
+  const defaultTitle = isGift
     ? `${item.title} | Personalized Pencil Carving | MicroArts by Vivek`
     : `${item.title} | Handmade Miniature Art | MicroArts by Vivek`
 
-  const description = cleanText(item.description)
-    .slice(0, 155) ||
+  const title =
+    cleanText(item.seoTitle) || defaultTitle
+
+  const defaultDescription =
+    cleanText(item.description).slice(0, 155) ||
     `Discover ${item.title}, handmade miniature art by Vivek Podagatla.`
+
+  const description =
+    cleanText(item.seoDescription) || defaultDescription
 
   let html = template.replace(
     /<title>[\s\S]*?<\/title>/i,
